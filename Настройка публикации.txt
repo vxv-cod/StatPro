@@ -1,0 +1,43 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ConsoleApp
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            string curent = "_test_";
+
+            if (System.Deployment.Application.ApplicationDeployment.IsNetworkDeployed)
+            {
+                curent = System.Deployment.Application.ApplicationDeployment.CurrentDeployment.CurrentVersion.ToString();
+            }
+            Console.WriteLine("Подождите, идет загрузка приложения...");
+            System.Diagnostics.Process.Start("StatPro.exe ", curent);
+        }
+    }
+}
+
+
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ConsoleApp
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Подождите, идет загрузка приложения...");
+            System.Diagnostics.Process.Start("StatPro.exe");
+        }
+    }
+}
