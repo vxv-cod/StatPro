@@ -6,7 +6,12 @@ from pythoncom import CoInitializeEx as pythoncomCoInitializeEx
 from PyQt5 import QtCore, QtWidgets
 import sys
 import traceback
+from rich import print
 
+import numpy as np
+import os
+import pyodbc
+import time
 
 from okno_ui import Ui_Form
 from  vxv_tnnc_SQL_Pyton import Sql
@@ -62,7 +67,7 @@ def max_row_sheet(sheet, row, col):
 
 # def importdataCode(sheet, StartNomerRow, StartNomerColl, EndNomerRow, EndNomerColl):
 #     '''Собираем список из 1ой колонки'''
-#     vals = sheet.Range(sheet.Cells(StartNomerRow, StartNomerColl), sheet.Cells(EndNomerRow, EndNomerColl)).value
+#     vals = sheet.Range(sheet.Cells(StartNomerRow, StartNomerColl), sheet.Cells(EndNomerRow, EndNomerColl)).Value
 #     vals = [vals[i][x] for i in range(len(vals)) for x in range(len(vals[i]))]
 #     return vals
 
@@ -73,7 +78,7 @@ def importdata(StartNomerRow, StartNomerColl, EndNomerRow, EndNomerColl, sheet, 
         # RowList85 = []
         for i in columnsList85:
             for j in range(0, index95 + 1):
-                val = sheet.Cells(row + j, StartNomerColl + i).value
+                val = sheet.Cells(row + j, StartNomerColl + i).Value
                 val = "-" if val == None else val
                 RowList85.append(val)
         return RowList85
@@ -81,7 +86,7 @@ def importdata(StartNomerRow, StartNomerColl, EndNomerRow, EndNomerColl, sheet, 
     TabListRow = []
     raschet85 = []
     '''Собираем список из 1ой колонки'''
-    OneColumnList = sheet.Range(sheet.Cells(1, StartNomerColl), sheet.Cells(EndNomerRow, StartNomerColl)).value
+    OneColumnList = sheet.Range(sheet.Cells(1, StartNomerColl), sheet.Cells(EndNomerRow, StartNomerColl)).Value
     OneColumnList = [str(OneColumnList[i][0]) for i in range(len(OneColumnList))]
     '''Ищем нужные индексы по искомым значениям и собираем список построчно из таблицы'''
     for row in range(StartNomerRow, len(OneColumnList)):
@@ -98,7 +103,7 @@ def importdata(StartNomerRow, StartNomerColl, EndNomerRow, EndNomerColl, sheet, 
         text = 'Нормативное значение (Xn)'
         if Xn == text:
             for col in range(StartNomerColl, EndNomerColl + 1):
-                val = sheet.Cells(row, col).value
+                val = sheet.Cells(row, col).Value
                 val = "-" if val == None else val
                 if val == text:
                     RowList.append(aaa)
@@ -112,11 +117,11 @@ def importdata(StartNomerRow, StartNomerColl, EndNomerRow, EndNomerColl, sheet, 
         proc = round(row / EndNomerRow * 100)
         if index95 == 1:
             sig.signal_1.emit(proc)
-            # if ui.progressBar_1.value() != proc:
+            # if ui.progressBar_1.Value() != proc:
             #     sig.signal_1.emit(proc)
         if index95 == 2:
             sig.signal_2.emit(proc)
-            # if ui.progressBar_2.value() != proc:
+            # if ui.progressBar_2.Value() != proc:
             #     sig.signal_2.emit(proc)
 
     return TabListRow, raschet85
@@ -137,7 +142,7 @@ def grani(sheet, gr, StartNomerRow, StartNomerColl, EndNomerRow, EndNomerColl):
 '''Отправляем данные в таблицу'''
 def exportdata(sheet, data, StartNomerColl, EndNomerColl, StartNomerRow, EndNomerRow, gr):
     '''Вносим данные построчно в таблицу'''
-    sheet.Range(sheet.Cells(StartNomerRow, StartNomerColl), sheet.Cells(EndNomerRow, EndNomerColl)).value = data
+    sheet.Range(sheet.Cells(StartNomerRow, StartNomerColl), sheet.Cells(EndNomerRow, EndNomerColl)).Value = data
     '''Для второй колонки устанавливаем Перенос текста и выравнивание по левому краю'''
     XCells = sheet.Range(sheet.Cells(StartNomerRow, StartNomerColl + 1), sheet.Cells(EndNomerRow, StartNomerColl + 1))
     XCells.WrapText = True
@@ -284,8 +289,8 @@ def FMTalie(workSheet, dataExp):
     '''Удаляем колонки со сдвигом влево'''
     workSheet.Range(workSheet.Columns(StartNomerColl), workSheet.Columns(countTab_col)).Delete(1)
 
-    workSheet.Range("D3").value = "ИГЭ"
-    workSheet.Range(workSheet.Cells(StartNomerRow, StartNomerColl), workSheet.Cells(EndNomerRow, EndNomerColl)).value = IGE
+    workSheet.Range("D3").Value = "ИГЭ"
+    workSheet.Range(workSheet.Cells(StartNomerRow, StartNomerColl), workSheet.Cells(EndNomerRow, EndNomerColl)).Value = IGE
     workSheet.Range(workSheet.Cells(3, StartNomerColl), workSheet.Cells(3, EndNomerColl)).Merge()
 
     '''Отправляем данные в таблицуи Рисуем грани таблицы'''
@@ -315,7 +320,7 @@ def SopostMexTal(workSheet, dataExpTalie):
     workSheet.Rows(f"{StartNomerRow}:{countTab_row}").Delete(1)
     
     workSheet.Range(workSheet.Cells(StartNomerRow, StartNomerColl), workSheet.Cells(EndNomerRow, EndNomerColl)).Borders.Weight = 2
-    workSheet.Range(workSheet.Cells(StartNomerRow, StartNomerColl), workSheet.Cells(EndNomerRow, EndNomerColl)).value = soposNeTorf
+    workSheet.Range(workSheet.Cells(StartNomerRow, StartNomerColl), workSheet.Cells(EndNomerRow, EndNomerColl)).Value = soposNeTorf
     gr = [[1, 1],  [3, 6], [11, 14]]
     grani(workSheet, gr, StartNomerRow, StartNomerColl, EndNomerRow, EndNomerColl)
     
@@ -341,7 +346,7 @@ def RachFMTal(workSheet, dataExpTalie):
     workSheet.Rows(f"{StartNomerRow}:{countTab_row}").Delete(1)
     
     workSheet.Range(workSheet.Cells(StartNomerRow, StartNomerColl), workSheet.Cells(EndNomerRow, EndNomerColl)).Borders.Weight = 2
-    workSheet.Range(workSheet.Cells(StartNomerRow, StartNomerColl), workSheet.Cells(EndNomerRow, EndNomerColl)).value = RachFMTalList
+    workSheet.Range(workSheet.Cells(StartNomerRow, StartNomerColl), workSheet.Cells(EndNomerRow, EndNomerColl)).Value = RachFMTalList
     gr = [[1, 3],  [7, 9]]
     grani(workSheet, gr, StartNomerRow, StartNomerColl, EndNomerRow, EndNomerColl)
     
@@ -378,8 +383,8 @@ def FMTorf(workSheet, data, dataM):
     '''Удаляем колонки со сдвигом влево'''
     workSheet.Range(workSheet.Columns(StartNomerColl), workSheet.Columns(countTab_col)).Delete(1)
 
-    workSheet.Range("D3").value = "ИГЭ"
-    workSheet.Range(workSheet.Cells(StartNomerRow, StartNomerColl), workSheet.Cells(EndNomerRow, EndNomerColl)).value = IGE
+    workSheet.Range("D3").Value = "ИГЭ"
+    workSheet.Range(workSheet.Cells(StartNomerRow, StartNomerColl), workSheet.Cells(EndNomerRow, EndNomerColl)).Value = IGE
     workSheet.Range(workSheet.Cells(3, StartNomerColl), workSheet.Cells(3, EndNomerColl)).Merge()
 
     '''Отправляем данные в таблицуи Рисуем грани таблицы'''
@@ -411,8 +416,8 @@ def FizMMg86(workSheet, dataM):
     '''Удаляем колонки со сдвигом влево'''
     workSheet.Range(workSheet.Columns(StartNomerColl), workSheet.Columns(countTab_col)).Delete(1)
 
-    workSheet.Range("D3").value = "ИГЭ"
-    workSheet.Range(workSheet.Cells(StartNomerRow, StartNomerColl), workSheet.Cells(EndNomerRow, EndNomerColl)).value = IGE
+    workSheet.Range("D3").Value = "ИГЭ"
+    workSheet.Range(workSheet.Cells(StartNomerRow, StartNomerColl), workSheet.Cells(EndNomerRow, EndNomerColl)).Value = IGE
     workSheet.Range(workSheet.Cells(3, StartNomerColl), workSheet.Cells(3, EndNomerColl)).Merge()
 
     '''Отправляем данные в таблицуи Рисуем грани таблицы'''
@@ -441,7 +446,7 @@ def MexMMG87(workSheet, dataM):
     '''Удаляем строки со сдвигом вверх'''
     workSheet.Rows(f"{StartNomerRow}:{countTab_row}").Delete(1)
     workSheet.Range(workSheet.Cells(StartNomerRow, StartNomerColl), workSheet.Cells(EndNomerRow, EndNomerColl)).Borders.Weight = 2
-    workSheet.Range(workSheet.Cells(StartNomerRow, StartNomerColl), workSheet.Cells(EndNomerRow, EndNomerColl)).value = IGE
+    workSheet.Range(workSheet.Cells(StartNomerRow, StartNomerColl), workSheet.Cells(EndNomerRow, EndNomerColl)).Value = IGE
     gr = [[0, 0], [1, 2], [4, 5]]
     grani(workSheet, gr, StartNomerRow, StartNomerColl, EndNomerRow, EndNomerColl)
 
@@ -469,7 +474,7 @@ def Teplofiz88(workSheet, data, dataM):
     '''Удаляем строки со сдвигом вверх'''
     workSheet.Rows(f"{StartNomerRow}:{countTab_row}").Delete(1)
     workSheet.Range(workSheet.Cells(StartNomerRow, StartNomerColl), workSheet.Cells(EndNomerRow, EndNomerColl)).Borders.Weight = 2
-    workSheet.Range(workSheet.Cells(StartNomerRow, StartNomerColl), workSheet.Cells(EndNomerRow, EndNomerColl)).value = IGE
+    workSheet.Range(workSheet.Cells(StartNomerRow, StartNomerColl), workSheet.Cells(EndNomerRow, EndNomerColl)).Value = IGE
     gr = [[0, 0], [1, 2], [5, 5]]
     grani(workSheet, gr, StartNomerRow, StartNomerColl, EndNomerRow, EndNomerColl)
 
@@ -499,7 +504,7 @@ def Gran810(workSheet, data, dataM):
     '''Удаляем строки со сдвигом вверх'''
     workSheet.Rows(f"{StartNomerRow}:{countTab_row}").Delete(1)
     workSheet.Range(workSheet.Cells(StartNomerRow, StartNomerColl), workSheet.Cells(EndNomerRow, EndNomerColl)).Borders.Weight = 2
-    workSheet.Range(workSheet.Cells(StartNomerRow, StartNomerColl), workSheet.Cells(EndNomerRow, EndNomerColl)).value = IGE
+    workSheet.Range(workSheet.Cells(StartNomerRow, StartNomerColl), workSheet.Cells(EndNomerRow, EndNomerColl)).Value = IGE
     gr = [[0, 0]]
     grani(workSheet, gr, StartNomerRow, StartNomerColl, EndNomerRow, EndNomerColl)
 
@@ -524,7 +529,7 @@ def Prosad(workSheet, dataM):
     '''Удаляем строки со сдвигом вверх'''
     workSheet.Rows(f"{StartNomerRow}:{countTab_row}").Delete(1)
     workSheet.Range(workSheet.Cells(StartNomerRow, StartNomerColl), workSheet.Cells(EndNomerRow, EndNomerColl)).Borders.Weight = 2
-    workSheet.Range(workSheet.Cells(StartNomerRow, StartNomerColl), workSheet.Cells(EndNomerRow, EndNomerColl)).value = IGE
+    workSheet.Range(workSheet.Cells(StartNomerRow, StartNomerColl), workSheet.Cells(EndNomerRow, EndNomerColl)).Value = IGE
     gr = [[0, 0], [2, 2]]
     grani(workSheet, gr, StartNomerRow, StartNomerColl, EndNomerRow, EndNomerColl)
 
@@ -698,8 +703,8 @@ def obrabotka():
 
 def errS(sheet, StartNomerRow, EndNomerRow, col, countRow, ValueNone):
     for i in range(StartNomerRow, EndNomerRow + 1):
-        aaa = str(sheet.Cells(i, col).value)
-        bbb = sheet.Cells(i, col + 1).value
+        aaa = str(sheet.Cells(i, col).Value)
+        bbb = sheet.Cells(i, col + 1).Value
         bbb = int(bbb)
         bbb = str(bbb)
 
@@ -737,6 +742,36 @@ def ifErr(formula):
     # print(text)
     return text
 
+def EndIndexRowCol(sheet):
+    # EndRow, EndCol = EndIndexRowCol(sheet)
+    '''Определяем позиции первой и последней ячейки'''
+    UsedRange = sheet.UsedRange
+    # '''Количество занимаемых таблицей строк'''
+    count_row = UsedRange.Rows.Count
+    # '''Количество занимаемых таблицей колонок'''
+    count_col = UsedRange.Columns.Count
+    # '''Номер первой занимаемой строчки'''
+    StartRow = UsedRange.Row
+    # '''Номер первой занимаемой колонки'''
+    StartCol = UsedRange.Column
+    # '''Номер последней занимаемой строчки'''
+    EndRow = StartRow + count_row - 1
+    # '''Номер последней занимаемой колонки'''
+    EndCol = StartCol + count_col - 1
+    return EndRow, EndCol
+
+def NFt(cells, okrug):
+    try:
+        cells.NumberFormat = okrug
+    except:
+        cells.NumberFormat = okrug.replace('.', ',')
+
+
+OKRTal = ["0.000", "0.000", "0.000", "0.00", "0.00", "0.00", "0.00", "0.00", "0", "0.00", "0.00", "0.000", "0.0", "0.000", 
+        "0.000", "0.0", "0.00", "0", "0", "0.00", "0.00", "0.00", "0.000", "0.00", "0.00", "0.00", "0.00", "0.0", "0.0", 
+        "0.0", "0.0", "0.000", "0", "0.000", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.00"]
+        
+
 # @thread
 def CodeTalie():
     try:
@@ -758,7 +793,7 @@ def CodeTalie():
         formula12 = [(formula1, formula2)]*countRow
         cell = sheet.Range(sheet.Cells(StartNomerRow, 6), sheet.Cells(EndNomerRow, 7))
         cell.ClearContents()
-        cell.value = formula12
+        cell.Value = formula12
         cell.Font.Color = -1179134
 
         formula3 = ifErr("RC[-2]/(1+RC[-7])")
@@ -770,21 +805,31 @@ def CodeTalie():
         cell = sheet.Range(sheet.Cells(StartNomerRow, 10), sheet.Cells(EndNomerRow, 13))
         cell.ClearContents()
         # cell.Interior.Pattern = 0
-        cell.value = formula36
+        cell.Value = formula36
         cell.Font.Color = -1179134
 
         formula7 = ifErr("RC[-2]*RC[-1]")
         cell = sheet.Range(sheet.Cells(StartNomerRow, 32), sheet.Cells(EndNomerRow, 32))
         cell.ClearContents()
-        cell.value = formula7
+        cell.Value = formula7
         cell.Font.Color = -1179134
         
         formula8 = ifErr("DEGREES(ATAN(RC[-1]))")
         cell = sheet.Range(sheet.Cells(StartNomerRow, 35), sheet.Cells(EndNomerRow, 35))
         cell.ClearContents()
-        cell.value = formula8
+        cell.Value = formula8
         cell.Font.Color = -1179134
-        cell.NumberFormat = "0,0"
+        # cell.NumberFormat = "0,0"
+
+        '''Округления ячеек Код Талые'''
+        EndRow, EndCol = EndIndexRowCol(sheet)
+        RowSt = 7
+        NFt(sheet.Range(sheet.Cells(RowSt, 1), sheet.Cells(EndRow, EndCol)), "0.000")
+        NFt(sheet.Range(sheet.Cells(RowSt, 1), sheet.Cells(EndRow, 1)), "0")
+        NFt(sheet.Range(sheet.Cells(RowSt, 2), sheet.Cells(EndRow, 2)), "0.0")
+        for ok in range(3, 47 + 1):
+            if OKRTal[ok-3] != "0.000":
+                NFt(sheet.Range(sheet.Cells(RowSt, ok), sheet.Cells(EndRow, ok)), OKRTal[ok-3])
 
 
         '''Создаем колонки для вставки'''
@@ -812,7 +857,7 @@ def CodeTalie():
         cel.ColumnWidth = 10
         cel.Borders.Weight = 2
 
-        cel = sheet.Range("AV2:AW2").value = ["Классификация грунтов согласно ГОСТ 25100", "Код грунта"]
+        cel = sheet.Range("AV2:AW2").Value = ["Классификация грунтов согласно ГОСТ 25100", "Код грунта"]
         sheet.Range(sheet.Cells(StartNomerRow, 48), sheet.Cells(EndNomerRow, 48)).Font.Color = 0
 
         data = []
@@ -822,7 +867,7 @@ def CodeTalie():
             sig.signal_21.emit(proc)
         
         XCells = sheet.Range(sheet.Cells(StartNomerRow, 48), sheet.Cells(EndNomerRow, 49))
-        XCells.value = data
+        XCells.Value = data
         XCells.WrapText = True
         XCells.Borders.Weight = 2
 
@@ -837,6 +882,18 @@ def CodeTalie():
     ui.checkBox_3.setEnabled(True)
     ui.checkBox_4.setEnabled(True)
 
+
+
+
+
+'''Округление ячеек (данные Мерзлые)'''
+OKRMerz = [
+        "0.000", "0.000", "0.000", "0.000", "0.000", "0.000", "0.000", "0.00", "0.00", "0.00", "0.00", "0.00", "0", "0.00", "0.00", 
+        "0.000", "0.000", "0.000", "0.000", "0.0", "0.000", "0.000", "0.0", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00", 
+        "0.000", "0.000", "0.000", "0.000", "0.000", "0.000", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0"
+        ]
+
+
 @thread
 def CodetMerz():
     try:
@@ -844,7 +901,6 @@ def CodetMerz():
         wb = CodeGrount.Book()
         sheet = wb.Worksheets("Код_Мерзлые")
         sheet.Activate()
-
         StartNomerRow = 7
         '''от нижнего края вверх до нижней крайней заполненной ячейки'''
         EndNomerRow = sheet.Cells(sheet.Rows.Count, 1).End(3).Row
@@ -853,11 +909,14 @@ def CodetMerz():
         '''Формулы (при вставке значений по вертикали использовать кортежи с пустым 2ым значением)
         пример: ("=формула", )"'''
         formula0 = ifErr("RC[-2]-RC[-1]")
-        formula1 = ifErr("RC[-3]-RC[-1]")
+        # formula1 = ifErr("RC[-3]-RC[-1]")
+        # formula1 = ifErr("RC[22]*RC[3]")
+        formula1 = f"=IFERROR(RC[22]*RC[3],0)"
+
         formula12 = [(formula0, formula1)]*countRow
         cell = sheet.Range(sheet.Cells(StartNomerRow, 5), sheet.Cells(EndNomerRow, 6))
         cell.ClearContents()
-        cell.value = formula12
+        cell.Value = formula12
         cell.Font.Color = -1179134
 
         formula2 = ifErr("RC[-2]-RC[-1]")
@@ -865,7 +924,7 @@ def CodetMerz():
         formula12 = [(formula2, formula3)]*countRow
         cell = sheet.Range(sheet.Cells(StartNomerRow, 10), sheet.Cells(EndNomerRow, 11))
         cell.ClearContents()
-        cell.value = formula12
+        cell.Value = formula12
         cell.Font.Color = -1179134
         
         formula4 = ifErr("RC[-1]/(1+RC[-11])")
@@ -878,8 +937,18 @@ def CodetMerz():
         formula12 = [(formula4, formula5, formula6, formula7, formula8, formula9, formula10)]*countRow
         cell = sheet.Range(sheet.Cells(StartNomerRow, 14), sheet.Cells(EndNomerRow, 20))
         cell.ClearContents()
-        cell.value = formula12
+        cell.Value = formula12
         cell.Font.Color = -1179134
+
+        '''Округления ячеек Код Мерзлые'''
+        EndRow, EndCol = EndIndexRowCol(sheet)
+        RowSt = 7
+        NFt(sheet.Range(sheet.Cells(RowSt, 1), sheet.Cells(EndRow, EndCol)), "0.000")
+        NFt(sheet.Range(sheet.Cells(RowSt, 1), sheet.Cells(EndRow, 1)), "0")
+        NFt(sheet.Range(sheet.Cells(RowSt, 2), sheet.Cells(EndRow, 2)), "0.0")
+        for ok in range(3, 49 + 1):
+            if OKRMerz[ok-3] != "0.000":
+                NFt(sheet.Range(sheet.Cells(RowSt, ok), sheet.Cells(EndRow, ok)), OKRMerz[ok-3])
 
 
         '''Создаем колонки для вставки'''
@@ -907,7 +976,7 @@ def CodetMerz():
         cel.ColumnWidth = 10
         cel.Borders.Weight = 2
 
-        cel = sheet.Range("AX2:AY2").value = ["Классификация грунтов согласно ГОСТ 25100", "Код грунта"]
+        cel = sheet.Range("AX2:AY2").Value = ["Классификация грунтов согласно ГОСТ 25100", "Код грунта"]
         sheet.Range(sheet.Cells(StartNomerRow, 50), sheet.Cells(EndNomerRow, 50)).Font.Color = 0
 
         data = []
@@ -920,7 +989,7 @@ def CodetMerz():
             sig.signal_22.emit(proc)
 
         XCells = sheet.Range(sheet.Cells(StartNomerRow, 50), sheet.Cells(EndNomerRow, 51))
-        XCells.value = data
+        XCells.Value = data
         XCells.WrapText = True
         XCells.Borders.Weight = 2
         
@@ -928,6 +997,7 @@ def CodetMerz():
         colorBar(ui.progressBar_13, color = [170, 170, 170])
     except Exception as e:
         text = f"Кодировка мерзлых крунтов не выполнена, повторите попытку \n\n{traceback.format_exc()}"
+        print(traceback.format_exc())
         sig.signal_err.emit(text)
     sig.signal_bool.emit(False)
     ui.checkBox_3.setEnabled(True)
@@ -962,6 +1032,7 @@ def potoktSortTal():
     try:
         SvodTabTalue.SrartSvodTalie(sig)
     except Exception as e:
+        print(traceback.format_exc())
         text = f"Сотрировка талых грунтов не выполнена, повторите попытку \n\n{traceback.format_exc()}"
         sig.signal_err.emit(text)
     sig.signal_bool.emit(False)
@@ -974,6 +1045,7 @@ def potoktSortMerz():
         SvodTabMerzlue.SrartSvodMerz(sig)
     # except:
     except Exception as e:
+        print(traceback.format_exc())
         text = f"Сотрировка мерзлых грунтов не выполнена, повторите попытку \n\n{traceback.format_exc()}"
         # text = str(traceback.print_tb(e))
         sig.signal_err.emit(text)

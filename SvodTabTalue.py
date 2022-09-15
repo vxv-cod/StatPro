@@ -27,7 +27,7 @@ def NFt(cells, okrug):
 
 def importdataCode(sheet, StartNomerRow, StartNomerColl, EndNomerRow, EndNomerColl):
     '''Собираем список из 1ой колонки'''
-    vals = sheet.Range(sheet.Cells(StartNomerRow, StartNomerColl), sheet.Cells(EndNomerRow, EndNomerColl)).value
+    vals = sheet.Range(sheet.Cells(StartNomerRow, StartNomerColl), sheet.Cells(EndNomerRow, EndNomerColl)).Value
     # vals = [vals[i][x] for i in range(len(vals)) for x in range(len(vals[i]))]
     if isinstance(vals, float) or vals == None:
         vals = [vals]
@@ -118,7 +118,7 @@ def SrartSvodTalie(sig):
         Row += 1
         nameX = str(int(i[0][-1])) + " " + i[0][-2]
         IGE = sheet.Cells(StartNomerRow + Row, StartNomerColl)
-        IGE.value = nameX
+        IGE.Value = nameX
         IGE.Font.Size = 14
         IGE.Font.Bold = True
         IGEnd = sheet.Range(sheet.Cells(StartNomerRow + Row, StartNomerColl), sheet.Cells(StartNomerRow + Row, EndNomerColl))
@@ -133,39 +133,59 @@ def SrartSvodTalie(sig):
         '''---------------------------------------------------------------------------'''
         Row += 1
         BBB = sheet.Range(sheet.Cells(StartNomerRow + Row, StartNomerColl), sheet.Cells(StartNomerRow + Row + lenX - 1, EndNomerColl))
-        BBB.value = i
+        BBB.Value = i
         BBB.Borders.Weight = 2
         BBB.HorizontalAlignment = 3
         NFt(BBB, "0.000")
         RowSt = StartNomerRow + Row
         RowEnd = StartNomerRow + Row + lenX - 1
 
+        '''Округление ячеек (даннче)'''
+        '''///////////////////////////////////////////////////////////////////////'''
+        def okrugl(StartNomerRow, RowEnd, Row):
+            col1 = "F"; col2 = "J"
+            NFt(sheet.Range(f"{col1}{StartNomerRow + Row}:{col2}{RowEnd}"), "0.00")
+            # NFt(sheet.Range(f"{col1}{StartNomerRow + Row}:{col2}{RowEnd}"), "0.00")
+            col1 = col2 = "K"
+            NFt(sheet.Range(f"{col1}{StartNomerRow + Row}:{col2}{RowEnd}"), "0")
+            col1 = "L"; col2 = "M"
+            NFt(sheet.Range(f"{col1}{StartNomerRow + Row}:{col2}{RowEnd}"), "0.00")
+            col1 = col2 = "O"
+            NFt(sheet.Range(f"{col1}{StartNomerRow + Row}:{col2}{RowEnd}"), "0.0")
+            col1 = col2 = "R"
+            NFt(sheet.Range(f"{col1}{StartNomerRow + Row}:{col2}{RowEnd}"), "0.0")
+            col1 = col2 = "S"
+            NFt(sheet.Range(f"{col1}{StartNomerRow + Row}:{col2}{RowEnd}"), "0.00")
+            col1 = "T"; col2 = "U"
+            NFt(sheet.Range(f"{col1}{StartNomerRow + Row}:{col2}{RowEnd}"), "0")
+            col1 = "V"; col2 = "X"
+            NFt(sheet.Range(f"{col1}{StartNomerRow + Row}:{col2}{RowEnd}"), "0.00")
+            col1 = "Z"; col2 = "AC"
+            NFt(sheet.Range(f"{col1}{StartNomerRow + Row}:{col2}{RowEnd}"), "0.00")
+            col1 = "AD"; col2 = "AG"
+            NFt(sheet.Range(f"{col1}{StartNomerRow + Row}:{col2}{RowEnd}"), "0.0")
+            col1 = "AI"; col2 = "AI"
+            NFt(sheet.Range(f"{col1}{StartNomerRow + Row}:{col2}{RowEnd}"), "0")
+            col1 = "AK"; col2 = "AU"
+            NFt(sheet.Range(f"{col1}{StartNomerRow + Row}:{col2}{RowEnd}"), "0.0")
+            col1 = col2 = "AJ"
+            NFt(sheet.Range(f"{col1}{StartNomerRow + Row}:{col2}{RowEnd}"), "0.00")
 
-        ''' Е '''
-        col = "AF"
-        BBB = sheet.Range(f"{col}{StartNomerRow + Row}:{col}{StartNomerRow + Row + lenX - 1}")
-        NFt(BBB, "0.00")
+        okrugl(StartNomerRow, RowEnd, Row)
 
-        col = "K"
-        BBB = sheet.Range(f"{col}{StartNomerRow + Row}:{col}{StartNomerRow + Row + lenX - 1}")
-        NFt(BBB, "0.0")
+
+
+
+        # OKR = ["0.000", "0.000", "0.000", "0.00", "0.00", "0.00", "0.00", "0.00", "0", "0.00", "0.00", "0.000", "0.0", "0.000", 
+        #         "0.000", "0.0", "0.00", "0", "0", "0.00", "0.00", "0.00", "0.000", "0.00", "0.00", "0.00", "0.00", "0.0", "0.0", 
+        #         "0.0", "0.0", "0.000", "0", "0.000", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.00"]
+                
         
-        ''' ϕi '''
-        col = "AI"
-        BBB = sheet.Range(f"{col}{StartNomerRow + Row}:{col}{StartNomerRow + Row + lenX - 1}")
-        NFt(BBB, "0.0")
-
-        col1 = "AK"
-        col2 = "AU"
-        BBB = sheet.Range(f"{col1}{StartNomerRow + Row}:{col2}{StartNomerRow + Row + lenX - 1}")
-        NFt(BBB, "0.00")
-
-        ''' Ci '''
-        col = "AJ"
-        BBB = sheet.Range(f"{col}{StartNomerRow + Row}:{col}{StartNomerRow + Row + lenX - 1}")
-        NFt(BBB, "0.00")
-        BBB = sheet.Range(f"{col}{StartNomerRow + Row + lenX - 1 - 1}:{col}{StartNomerRow + Row + lenRRR - 1}")
-        NFt(BBB, "0.00")
+        # for ok in range(3, 47 + 1):
+        #     if OKR[ok-3] != "0.000":
+        #         NFt(sheet.Range(sheet.Cells(RowSt, ok), sheet.Cells(RowEnd, ok)), OKR[ok-3])
+        
+        '''///////////////////////////////////////////////////////////////////////'''
 
         Row = Row + lenX - 1
 
@@ -174,7 +194,7 @@ def SrartSvodTalie(sig):
         '''---------------------------------------------------------------------------'''
         Row += 1
         AAA = sheet.Range(sheet.Cells(StartNomerRow + Row, StartNomerColl), sheet.Cells(StartNomerRow  + Row  + lenRRR - 1, EndNomerColl))
-        sheet.Range(sheet.Cells(StartNomerRow + Row, StartNomerColl), sheet.Cells(StartNomerRow  + Row  + lenRRR - 1, StartNomerColl + 1)).value = RRR
+        sheet.Range(sheet.Cells(StartNomerRow + Row, StartNomerColl), sheet.Cells(StartNomerRow  + Row  + lenRRR - 1, StartNomerColl + 1)).Value = RRR
         AAA.Borders.Weight = 2
         # AAA.WrapText = True
         AAA.HorizontalAlignment = 3
@@ -218,7 +238,8 @@ def SrartSvodTalie(sig):
                 XmasList.append(xxx)
 
             if sum(uuu) != 0 and sum(uuu) != None:
-                if col not in [6, 7, 10, 11, 12, 13, 32, 35]:
+                # if col not in [6, 7, 10, 11, 12, 13, 32, 35]:
+                if col not in [6, 7, 10, 11, 12, 13, 18, 32, 35]:
                     xxx = f"=AVERAGE(R[-{lenX - 1 + 4}]C:R[-4]C)"
                 if col == 6:
                     xxx = "=RC[-2]-RC[-1]"
@@ -232,6 +253,10 @@ def SrartSvodTalie(sig):
                     xxx = "=(RC[-3]-RC[-2])/RC[-2]"
                 if col == 13:
                     xxx = "=(RC[-10]*RC[-4])/RC[-1]"
+
+                if col == 18:
+                    xxx = f"=MAX(R[-{lenX - 1 + 4}]C:R[-4]C)"
+
                 if col == 32:
                     xxx = "=RC[-2]*RC[-1]"
                 if col == 35:
@@ -314,31 +339,41 @@ def SrartSvodTalie(sig):
         ResList.append(Raschet085List)
         ResList.append(Raschet095List)
 
-        sheet.Range(sheet.Cells(RowEnd + 1, 3), sheet.Cells(RowEnd + 12, EndNomerColl)).value = ResList
+        sheet.Range(sheet.Cells(RowEnd + 1, 3), sheet.Cells(RowEnd + 12, EndNomerColl)).Value = ResList
 
-        ''' Е '''
-        col = "AF"
-        BBB = sheet.Range(f"{col}{StartNomerRow + Row}:{col}{StartNomerRow + Row + lenRRR - 1}")
-        NFt(BBB, "0.00")
+        # ''' Е '''
+        # col = "AF"
+        # BBB = sheet.Range(f"{col}{StartNomerRow + Row}:{col}{StartNomerRow + Row + lenRRR - 1}")
+        # NFt(BBB, "0.00")
 
-        ''' ϕi '''
-        col = "AI"
-        BBB = sheet.Range(f"{col}{StartNomerRow + Row}:{col}{StartNomerRow + Row + 3}")
-        NFt(BBB, "0.0")
-        BBB = sheet.Range(f"{col}{StartNomerRow + Row + lenRRR - 1 - 1}:{col}{StartNomerRow + Row + lenRRR - 1}")
-        NFt(BBB, "0")
+        # ''' ϕi '''
+        # col = "AI"
+        # BBB = sheet.Range(f"{col}{StartNomerRow + Row}:{col}{StartNomerRow + Row + 3}")
+        # NFt(BBB, "0.0")
+        # BBB = sheet.Range(f"{col}{StartNomerRow + Row + lenRRR - 1 - 1}:{col}{StartNomerRow + Row + lenRRR - 1}")
+        # NFt(BBB, "0")
 
-        col1 = "AK"
-        col2 = "AU"
-        BBB = sheet.Range(f"{col1}{StartNomerRow + Row}:{col2}{StartNomerRow + Row + lenRRR - 1}")
-        NFt(BBB, "0.00")
+        # col1 = "AK"
+        # col2 = "AU"
+        # BBB = sheet.Range(f"{col1}{StartNomerRow + Row}:{col2}{StartNomerRow + Row + lenRRR - 1}")
+        # NFt(BBB, "0.00")
 
-        ''' Ci '''
-        col = "AJ"
-        BBB = sheet.Range(f"{col}{StartNomerRow + Row}:{col}{StartNomerRow + Row + 3}")
-        NFt(BBB, "0.00")
-        BBB = sheet.Range(f"{col}{StartNomerRow + Row + lenRRR - 1 - 1}:{col}{StartNomerRow + Row + lenRRR - 1}")
-        NFt(BBB, "0.00")
+        # ''' Ci '''
+        # col = "AJ"
+        # BBB = sheet.Range(f"{col}{StartNomerRow + Row}:{col}{StartNomerRow + Row + 3}")
+        # NFt(BBB, "0.00")
+        # BBB = sheet.Range(f"{col}{StartNomerRow + Row + lenRRR - 1 - 1}:{col}{StartNomerRow + Row + lenRRR - 1}")
+        # NFt(BBB, "0.00")
+
+
+        '''Округление ячеек (расчет)'''
+        RowEnd = StartNomerRow + Row + lenRRR - 1
+        okrugl(StartNomerRow, RowEnd, Row)
+
+        # RowSt = StartNomerRow + Row
+        # for ok in range(3, 47 + 1):
+        #     NFt(sheet.Range(sheet.Cells(RowSt, ok), sheet.Cells(RowEnd, ok)), str(OKR[ok-3]))
+
 
         '''Кол-во определений (n)'''
         AAA = sheet.Range(sheet.Cells(StartNomerRow + Row, StartNomerColl), sheet.Cells(StartNomerRow + Row, EndNomerColl))

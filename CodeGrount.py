@@ -12,7 +12,7 @@ from pythoncom import CoInitializeEx as pythoncomCoInitializeEx
 
 def importdataCode(sheet, StartNomerRow, StartNomerColl, EndNomerRow, EndNomerColl):
     '''Собираем список из 1ой колонки'''
-    vals = sheet.Range(sheet.Cells(StartNomerRow, StartNomerColl), sheet.Cells(EndNomerRow, EndNomerColl)).value
+    vals = sheet.Range(sheet.Cells(StartNomerRow, StartNomerColl), sheet.Cells(EndNomerRow, EndNomerColl)).Value
     vals = [vals[i][x] for i in range(len(vals)) for x in range(len(vals[i]))]
     return vals
 
@@ -22,7 +22,7 @@ def codeTalie(sheet, StartNomerRow):
     # Raznovidnost = ""
     RewXXX = ["####"] + importdataCode(sheet, StartNomerRow, StartNomerColl, StartNomerRow, EndNomerColl)
     RewXXX = [None if i == '' else i for i in RewXXX]
-    print(f"RewXXX = {RewXXX}")
+    # print(f"RewXXX = {RewXXX}")
 
     Ip = RewXXX[6]
     Ip = None if Ip == '' else Ip
@@ -32,6 +32,8 @@ def codeTalie(sheet, StartNomerRow):
     Sr = None if Sr == '' else Sr
     Ir = RewXXX[14]
     Ir = None if Ir == '' else Ir
+    # Ir = None if isinstance(Ir, str) else Ir
+    
     Ddp = RewXXX[15]
     Ddp = None if Ddp == '' else Ddp
     W = RewXXX[3]
@@ -405,6 +407,7 @@ def codeMerz(sheet, StartNomerRow):
     Srf = RewXXX[17]
     Ir = RewXXX[21]
     Ir = 0 if Ir == None else Ir
+    # Ir = 0 if isinstance(Ir, str) else Ir
     Ddp = RewXXX[22]
     Itot = RewXXX[18]
     Itot = 0 if Itot == None else Itot
@@ -560,7 +563,7 @@ def codeMerz(sheet, StartNomerRow):
             CodeIGE = xxx[1]          
 
     '''Пески'''
-    if Ip == None and Ir < 0.5:
+    if Ip == None and not isinstance(Ir, str) and Ir < 0.5:
         '''1 - Цифра: вид грунта'''
         Raznovidnost = "Песок"
         CodeIGE = "4"
@@ -659,11 +662,14 @@ def codeMerz(sheet, StartNomerRow):
         if Ir == 0:
             CodeIGE = CodeIGE + "0"
             ValueNone = 1
-        if 0 < Ir <= 0.03:
+        if Ir == '':
             CodeIGE = CodeIGE + "0"
-        if 0.03 <= Ir <= 0.10:
-            Raznovidnost = Raznovidnost + " с примесью органического вещества"
-            CodeIGE = CodeIGE + "1"
+        if Ir != '':
+            if 0 < Ir <= 0.03:
+                CodeIGE = CodeIGE + "0"
+            if 0.03 <= Ir <= 0.10:
+                Raznovidnost = Raznovidnost + " с примесью органического вещества"
+                CodeIGE = CodeIGE + "1"
     
     if 0.1 < Ir <= 0.25:
         Raznovidnost = Raznovidnost + " с низким содержанием орг.вещества (слабозаторфованные)"
@@ -822,7 +828,7 @@ def SrartTalie():
     '''от нижнего края вверх до нижней крайней заполненной ячейки'''
     EndNomerRow = sheet.Cells(sheet.Rows.Count, 1).End(3).Row
     data = [codeTalie(sheet, i) for i in range(StartNomerRow, EndNomerRow + 1)]
-    sheet.Range(sheet.Cells(StartNomerRow, 48), sheet.Cells(EndNomerRow, 49)).value = data
+    sheet.Range(sheet.Cells(StartNomerRow, 48), sheet.Cells(EndNomerRow, 49)).Value = data
 
 
 def SrartMerz():
@@ -839,7 +845,7 @@ def SrartMerz():
     # EndNomerRow = aaa
     
     data = [codeMerz(sheet, i) for i in range(StartNomerRow, EndNomerRow + 1)]
-    sheet.Range(sheet.Cells(StartNomerRow, 50), sheet.Cells(EndNomerRow, 51)).value = data
+    sheet.Range(sheet.Cells(StartNomerRow, 50), sheet.Cells(EndNomerRow, 51)).Value = data
 
 
 if __name__ == "__main__":

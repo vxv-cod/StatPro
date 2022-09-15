@@ -27,7 +27,7 @@ def NFt(cells, okrug):
 
 def importdataCode(sheet, StartNomerRow, StartNomerColl, EndNomerRow, EndNomerColl):
     '''Собираем список из 1ой колонки'''
-    vals = sheet.Range(sheet.Cells(StartNomerRow, StartNomerColl), sheet.Cells(EndNomerRow, EndNomerColl)).value
+    vals = sheet.Range(sheet.Cells(StartNomerRow, StartNomerColl), sheet.Cells(EndNomerRow, EndNomerColl)).Value
     # vals = [vals[i][x] for i in range(len(vals)) for x in range(len(vals[i]))]
     if isinstance(vals, float) or vals == None:
         vals = [vals]
@@ -40,7 +40,8 @@ def svodTalie(sheet, StartNomerRow, EndNomerRow, StartNomerColl, EndNomerColl):
     data = []
     for i in range(StartNomerRow, EndNomerRow + 1):
         RewXXX = importdataCode(sheet, i, StartNomerColl, i, EndNomerColl)
-        RewXXX = [None if i == '' or i == 0 else i for i in RewXXX]
+        # RewXXX = [None if i == '' or i == 0 else i for i in RewXXX]
+        RewXXX = [None if i == '' else i for i in RewXXX]
         data.append(RewXXX)
     return data
 
@@ -56,6 +57,7 @@ def SrartSvodMerz(sig):
     StartNomerColl = 1
     EndNomerColl = 51
     data = svodTalie(sheet, StartNomerRow, EndNomerRow, StartNomerColl, EndNomerColl)
+
     '''Сортировка списка по ключу'''
     datasort = sorted(data, key = lambda i: int(i[-1]))
     codeNomer = [int(i[-1]) for i in datasort]
@@ -120,7 +122,7 @@ def SrartSvodMerz(sig):
         Row += 1
         nameX = str(int(i[0][-1])) + " " + i[0][-2]
         IGE = sheet.Cells(StartNomerRow + Row, StartNomerColl)
-        IGE.value = nameX
+        IGE.Value = nameX
         IGE.Font.Size = 14
         IGE.Font.Bold = True
         IGEnd = sheet.Range(sheet.Cells(StartNomerRow + Row, StartNomerColl), sheet.Cells(StartNomerRow + Row, EndNomerColl))
@@ -135,22 +137,37 @@ def SrartSvodMerz(sig):
         '''---------------------------------------------------------------------------'''
         Row += 1
         BBB = sheet.Range(sheet.Cells(StartNomerRow + Row, StartNomerColl), sheet.Cells(StartNomerRow + Row + lenX - 1, EndNomerColl))
-        BBB.value = i
+        BBB.Value = i
         BBB.Borders.Weight = 2
         BBB.HorizontalAlignment = 3
         NFt(BBB, "0.000")
-        # RowSt = StartNomerRow + Row
+        RowSt = StartNomerRow + Row
         RowEnd = StartNomerRow + Row + lenX - 1
 
-        col = "O"
-        BBB = sheet.Range(f"{col}{StartNomerRow + Row}:{col}{StartNomerRow + Row + lenX - 1}")
-        NFt(BBB, "0.0")
+        # col = "O"
+        # BBB = sheet.Range(f"{col}{StartNomerRow + Row}:{col}{StartNomerRow + Row + lenX - 1}")
+        # NFt(BBB, "0.0")
         
-        col1 = "AM"
-        col2 = "AW"
-        BBB = sheet.Range(f"{col1}{StartNomerRow + Row}:{col2}{StartNomerRow + Row + lenX - 1}")
-        NFt(BBB, "0.00")
+        # col1 = "AM"
+        # col2 = "AW"
+        # BBB = sheet.Range(f"{col1}{StartNomerRow + Row}:{col2}{StartNomerRow + Row + lenX - 1}")
+        # NFt(BBB, "0.00")
 
+        NFt(sheet.Range(sheet.Cells(RowSt, 1), sheet.Cells(RowEnd, 1)), "0")
+        NFt(sheet.Range(sheet.Cells(RowSt, 2), sheet.Cells(RowEnd, 2)), "0.0")
+
+        '''Округление ячеек (данные Мерзлые)'''
+        OKR = [
+                "0.000", "0.000", "0.000", "0.000", "0.000", "0.000", "0.000", "0.00", "0.00", "0.00", "0.00", "0.00", "0", "0.00", "0.00", 
+                "0.000", "0.000", "0.000", "0.000", "0.0", "0.000", "0.000", "0.0", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00", 
+                "0.000", "0.000", "0.000", "0.000", "0.000", "0.000", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0"
+                ]
+
+        for ok in range(3, 49 + 1):
+            if OKR[ok-3] != "0.000":
+                NFt(sheet.Range(sheet.Cells(RowSt, ok), sheet.Cells(RowEnd, ok)), OKR[ok-3])
+            
+        
         Row = Row + lenX - 1
         
         '''---------------------------------------------------------------------------'''
@@ -158,7 +175,7 @@ def SrartSvodMerz(sig):
         '''---------------------------------------------------------------------------'''
         Row += 1
         AAA = sheet.Range(sheet.Cells(StartNomerRow + Row, StartNomerColl), sheet.Cells(StartNomerRow  + Row  + lenRRR - 1, EndNomerColl))
-        sheet.Range(sheet.Cells(StartNomerRow + Row, StartNomerColl), sheet.Cells(StartNomerRow  + Row  + lenRRR - 1, StartNomerColl + 1)).value = RRR
+        sheet.Range(sheet.Cells(StartNomerRow + Row, StartNomerColl), sheet.Cells(StartNomerRow  + Row  + lenRRR - 1, StartNomerColl + 1)).Value = RRR
         AAA.Borders.Weight = 2
         # AAA.WrapText = True
         AAA.HorizontalAlignment = 3
@@ -199,10 +216,19 @@ def SrartSvodMerz(sig):
                 xxx = f"=MAX(R[-{lenX - 1 + 3}]C:R[-3]C)"
                 XmasList.append(xxx)
             else:
-                xxx = None
-                nnnList.append(xxx)
-                XminList.append(xxx)
-                XmasList.append(xxx)
+                if col == 6:
+                    xxx = f"=COUNT(R[-{lenX - 1 + 1}]C:R[-1]C)"
+                    nnnList.append(xxx)
+                    xxx = f"=MIN(R[-{lenX - 1 + 2}]C:R[-2]C)"
+                    XminList.append(xxx)
+                    xxx = f"=MAX(R[-{lenX - 1 + 3}]C:R[-3]C)"
+                    XmasList.append(xxx)
+                else:
+                    xxx = None
+                    nnnList.append(xxx)
+                    XminList.append(xxx)
+                    XmasList.append(xxx)
+    
 
             if sum(uuu) != 0 and sum(uuu) != None:
                 if col not in [5, 6, 7, 10, 11] and col not in range(14, 20 + 1):
@@ -232,7 +258,10 @@ def SrartSvodMerz(sig):
                 if col == 20:
                     xxx = "=RC[-2]-RC[-1]"
             else:
-                xxx = None
+                if col == 6:
+                    xxx = "=RC[22]*RC[3]"
+                else:
+                    xxx = None
             XnList.append(xxx)
 
             if sum(uuu) != 0 and len(uuu) != 1:
@@ -349,19 +378,27 @@ def SrartSvodMerz(sig):
 
         # print(f"ResList = {ResList}")
 
-        sheet.Range(sheet.Cells(RowEnd + 1, 3), sheet.Cells(RowEnd + 15, EndNomerColl)).value = ResList
+        sheet.Range(sheet.Cells(RowEnd + 1, 3), sheet.Cells(RowEnd + 15, EndNomerColl)).Value = ResList
         
         '''-----------------------------------------------------------------------------------------------'''
         '''-----------------------------------------------------------------------------------------------'''
 
-        col = "O"
-        BBB = sheet.Range(f"{col}{StartNomerRow + Row}:{col}{StartNomerRow  + Row  + lenRRR - 1}")
-        NFt(BBB, "0.0")
+        # col = "O"
+        # BBB = sheet.Range(f"{col}{StartNomerRow + Row}:{col}{StartNomerRow  + Row  + lenRRR - 1}")
+        # NFt(BBB, "0.0")
 
-        col1 = "AM"
-        col2 = "AW"
-        BBB = sheet.Range(f"{col1}{StartNomerRow + Row}:{col2}{StartNomerRow  + Row  + lenRRR - 1}")
-        NFt(BBB, "0.00")
+        # col1 = "AM"
+        # col2 = "AW"
+        # BBB = sheet.Range(f"{col1}{StartNomerRow + Row}:{col2}{StartNomerRow  + Row  + lenRRR - 1}")
+        # NFt(BBB, "0.00")
+        
+
+        '''Округление ячеек (расчет)'''
+        RowSt = StartNomerRow + Row
+        RowEnd = StartNomerRow  + Row  + lenRRR - 1
+        for ok in range(3, 49 + 1):
+            NFt(sheet.Range(sheet.Cells(RowSt, ok), sheet.Cells(RowEnd, ok)), OKR[ok-3])
+
 
 
         '''Кол-во определений (n)'''
