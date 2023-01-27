@@ -1,0 +1,1 @@
+start/w setversion.exe
